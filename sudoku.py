@@ -151,7 +151,7 @@ def RecursiveBacktrack( sudokuboard ):
                 for k in range(subsquare):
                     for j in range(subsquare):
                         if((board[SquareRow*subsquare + k][SquareCol*subsquare + j] == value)
-                           and (SquareRow*subsquare + k != row) and (SquareCol*subsquare + j != col)):
+                           and (SquareRow*subsquare + k != nextrow) and (SquareCol*subsquare + j != nextcol)):
 #                            print "Value " ,value ,  " exists"
                             test = False
 

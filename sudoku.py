@@ -1,29 +1,40 @@
 #!/usr/bin/env python
+
+
+
+
+#------ STARTER CODE ------
+
 import struct, string, math
 
-#this will be the game object your player will manipulate
+
 class SudokuBoard:
+	"""
+	Game object that player manipulates 
+	"""
 
-    #the constructor for the SudokuBoard
     def __init__(self, size, board):
-      self.BoardSize = size #the size of the board
-      self.CurrentGameboard= board #the current state of the game board
+    	"""
+    	Constructor for SudokuBoard
+    	"""
+      	self.BoardSize = size #the size of the board
+      	self.CurrentGameboard= board #the current state of the game board
 
-    #This function will create a new sudoku board object with
-    #with the input value placed on the GameBoard row and col are
-    #both zero-indexed
     def set_value(self, row, col, value):
+    	"""
+    	Creates a new SudokuBoard object with input value
+    	placed on the GameBoard, row and col zero-indexed
+    	"""
         self.CurrentGameboard[row][col]=value #add the value to the appropriate position on the board
         return SudokuBoard(self.BoardSize, self.CurrentGameboard) #return a new board of the same size with the value added
-    
 
-
-# parse_file
-#this function will parse a sudoku text file (like those posted on the website)
-#into a BoardSize, and a 2d array [row,col] which holds the value of each cell.
-# array elements witha value of 0 are considered to be empty
 
 def parse_file(filename):
+	"""
+	Parses a sudoku text file into a BoardSize and a 2d array
+	[row, col] which holds the value of each cell. Array
+	elements with a value of 0 are considered to be empty
+	"""
     f = open(filename, 'r')
     BoardSize = int( f.readline())
     NumVals = int(f.readline())
@@ -41,18 +52,18 @@ def parse_file(filename):
         board[row-1][col-1]=val
     
     return board
-    
 
 
-
-#takes in an array representing a sudoku board and tests to
-#see if it has been filled in correctly
 def iscomplete( BoardArray ):
+	"""
+	Takes in an array representing a sudoku board and
+	tests to see if it has been filled in correctly
+	"""
         size = len(BoardArray)
         subsquare = int(math.sqrt(size))
 
-        #check each cell on the board for a 0, or if the value of the cell
-        #is present elsewhere within the same row, column, or square
+        #check that there are no 0s, or if the value of the cell
+        #check if double values in row, column, or subsquare
         for row in range(size):
             for col in range(size):
 
@@ -73,23 +84,34 @@ def iscomplete( BoardArray ):
                             return False
         return True
 
-# creates a SudokuBoard object initialized with values from a text file like those found on the course website
+
 def init_board( file_name ):
+	"""
+	Creates a SudokuBoard object initialized with values from
+	a text file like those found on the course website
+	"""
     board = parse_file(file_name)
     return SudokuBoard(len(board), board)
 
-#---------------------------------------------------------------------------------------------------------------#
 
-# Backtracking Algorithm (in slides pretty much?)
 
-# returns a solution, or false
+
+#------ BACKTRACKING ALGORITHM ------
+
 def BacktrackingSearch( sudokuboard ):
+	"""
+	Returns a solution using a backtracking algorithm
+	Returns false if no solution
+	"""
     return RecursiveBacktrack(sudokuboard)
 
 checks = 0
 
-# returns a solution or false
-def RecursiveBacktrack( sudokuboard ): 
+
+def RecursiveBacktrack( sudokuboard ):
+	"""
+	Backtracking algorithm
+	"""
     global checks
     board = sudokuboard.CurrentGameboard
     if(iscomplete( board )):
@@ -157,10 +179,16 @@ def RecursiveBacktrack( sudokuboard ):
                     exit()
                     
     return False
+
                         
 
 
-#--------------------TESTING------------------#
+#------ FORWARD CHECKING ALGORITHM ------
+
+
+
+
+#------ TESTING ------
 
 def PrintBoard(sudokuboard):
     board = sudokuboard.CurrentGameboard
@@ -173,24 +201,14 @@ def PrintBoard(sudokuboard):
     print ""
 
 
-sb = init_board("test1.txt")
-
-b = init_board("test3.txt")
-
 print "Testing backtracking"
-
+sb = init_board("test1.txt")
 PrintBoard(sb)
-
 BacktrackingSearch(sb)
-
+b = init_board("test3.txt")
 PrintBoard(b)
-
 BacktrackingSearch(b)
 
-# Forward Checking
 
-
-
-# Minimum Remaining Values
 
 

@@ -84,13 +84,17 @@ def init_board( file_name ):
 
 # returns a solution, or false
 def BacktrackingSearch( sudokuboard ):
-    return RecursiveBacktrack(sudokuboard, 0)
+    return RecursiveBacktrack(sudokuboard)
+
+checks = 0
 
 # returns a solution or false
-def RecursiveBacktrack( sudokuboard , checks): 
+def RecursiveBacktrack( sudokuboard ): 
+    global checks
     board = sudokuboard.CurrentGameboard
     if(iscomplete( board )):
-           return board
+        return board
+    
     #select unassigned variable (in board)
     size = len(board)
     subsquare = (int)(math.sqrt(size))
@@ -104,14 +108,15 @@ def RecursiveBacktrack( sudokuboard , checks):
     
     # try values at location [nextrow, nextcol] 
     for value in range(1,size+1):
-        print "Try location " , nextrow, ", " , nextcol , " with " , value
+#        print "Try location " , nextrow, ", " , nextcol , " with " , value
         test = True
         # check if value exists in row or column
+        checks += 1
         for i in range(size):
-            checks += 2
+
             if(value == board[nextrow][i] or value == board[i][nextcol]):
                 test = False
-                print "Already exists in row or column"
+ #               print "Already exists in row or column"
                 
             
             
@@ -123,10 +128,9 @@ def RecursiveBacktrack( sudokuboard , checks):
                 # check the subsquare to see if value is already present
                 for k in range(subsquare):
                     for j in range(subsquare):
-                        checks += 1
                         if((board[SquareRow*subsquare + k][SquareCol*subsquare + j] == value)
                            and (SquareRow*subsquare + k != row) and (SquareCol*subsquare + j != col)):
-                            print "Value " ,value ,  " exists"
+#                            print "Value " ,value ,  " exists"
                             test = False
 
                 # if not present in either column/row or subsquare, add value to the assignment
@@ -134,13 +138,24 @@ def RecursiveBacktrack( sudokuboard , checks):
                     #board[nextrow][nextcol] = value
 
                     sudokuboard.set_value(nextrow,nextcol,value)
-                    PrintBoard(sudokuboard)
-            
-                    result = RecursiveBacktrack(sudokuboard, checks)
+  #                  PrintBoard(sudokuboard)
+                    if(checks > 300000):
+                        print "Taking too long..." 
+                        PrintBoard(sudokuboard)
+                        exit()
+
+                    result = RecursiveBacktrack(sudokuboard)
                     if(result != False):
                         print "Number of checks: ", checks
+                        PrintBoard(sudokuboard)
                         return result
                     sudokuboard.set_value(nextrow, nextcol, 0)
+                
+                if(checks > 300000):
+                    print "Taking too long..." 
+                    PrintBoard(sudokuboard)
+                    exit()
+                    
     return False
                         
 
@@ -160,7 +175,7 @@ def PrintBoard(sudokuboard):
 
 sb = init_board("test1.txt")
 
-b = init_board("test2.txt")
+b = init_board("test3.txt")
 
 print "Testing backtracking"
 

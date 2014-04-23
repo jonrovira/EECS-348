@@ -9,32 +9,32 @@ import struct, string, math
 
 
 class SudokuBoard:
-	"""
-	Game object that player manipulates 
-	"""
+    '''
+    Game object that player manipulates 
+    '''
 
     def __init__(self, size, board):
-    	"""
-    	Constructor for SudokuBoard
-    	"""
-      	self.BoardSize = size #the size of the board
-      	self.CurrentGameboard= board #the current state of the game board
+	    '''
+	    Constructor for SudokuBoard
+	    '''
+	    self.BoardSize = size #the size of the board
+	    self.CurrentGameboard= board #the current state of the game board
 
     def set_value(self, row, col, value):
-    	"""
+    	'''
     	Creates a new SudokuBoard object with input value
     	placed on the GameBoard, row and col zero-indexed
-    	"""
+    	'''
         self.CurrentGameboard[row][col]=value #add the value to the appropriate position on the board
         return SudokuBoard(self.BoardSize, self.CurrentGameboard) #return a new board of the same size with the value added
 
 
 def parse_file(filename):
-	"""
-	Parses a sudoku text file into a BoardSize and a 2d array
-	[row, col] which holds the value of each cell. Array
-	elements with a value of 0 are considered to be empty
-	"""
+    '''
+    Parses a sudoku text file into a BoardSize and a 2d array
+    [row, col] which holds the value of each cell. Array
+    elements with a value of 0 are considered to be empty
+    '''
     f = open(filename, 'r')
     BoardSize = int( f.readline())
     NumVals = int(f.readline())
@@ -86,10 +86,10 @@ def iscomplete( BoardArray ):
 
 
 def init_board( file_name ):
-	"""
-	Creates a SudokuBoard object initialized with values from
-	a text file like those found on the course website
-	"""
+    """
+    Creates a SudokuBoard object initialized with values from
+    a text file like those found on the course website
+    """
     board = parse_file(file_name)
     return SudokuBoard(len(board), board)
 
@@ -99,88 +99,89 @@ def init_board( file_name ):
 #------ BACKTRACKING ALGORITHM ------
 
 def BacktrackingSearch( sudokuboard ):
-	"""
-	Returns a solution using a backtracking algorithm
-	Returns false if no solution
-	"""
+    """
+    Returns a solution using a backtracking algorithm
+    Returns false if no solution
+    """
     return RecursiveBacktrack(sudokuboard)
 
 checks = 0
 
 
 def RecursiveBacktrack( sudokuboard ):
-	"""
-	Backtracking algorithm
-	"""
+    """
+    Backtracking algorithm
+    """
     global checks
     board = sudokuboard.CurrentGameboard
     if(iscomplete( board )):
+        print "Finished!" 
+        print "Checks: " , checks
+        PrintBoard(sudokuboard)
         return board
     
     #select unassigned variable (in board)
     size = len(board)
     subsquare = (int)(math.sqrt(size))
+    nextrow = -1
+    nextcol = -1
     
     for row in range(size):
         for col in range(size):
-
             if board[row][col] == 0:
                 nextrow = row
                 nextcol = col
-    
+
     # try values at location [nextrow, nextcol] 
     for value in range(1,size+1):
 #        print "Try location " , nextrow, ", " , nextcol , " with " , value
-        test = True
         # check if value exists in row or column
         checks += 1
-        for i in range(size):
+#        print value
+                                
+#        if(checks > 1000000):
+#            print "Taking too long..." 
+#            PrintBoard(sudokuboard)
+#            checks = 0
+#            exit()
+        
 
-            if(value == board[nextrow][i] or value == board[i][nextcol]):
-                test = False
- #               print "Already exists in row or column"
-                
-            
-            
+        test = CheckConstraints(board, nextrow, nextcol, value) 
+
         if(test):
-            for i in range(size):
-                # check the row and column of the selected entry to see if value already exists
-                SquareRow = nextrow // subsquare
-                SquareCol = nextcol // subsquare
-                # check the subsquare to see if value is already present
-                for k in range(subsquare):
-                    for j in range(subsquare):
-                        if((board[SquareRow*subsquare + k][SquareCol*subsquare + j] == value)
-                           and (SquareRow*subsquare + k != nextrow) and (SquareCol*subsquare + j != nextcol)):
-#                            print "Value " ,value ,  " exists"
-                            test = False
+            sudokuboard.set_value(nextrow,nextcol,value)
+            result = RecursiveBacktrack(sudokuboard)
+#            print result
+            if(not result):
 
-                # if not present in either column/row or subsquare, add value to the assignment
-                if(test):
-                    #board[nextrow][nextcol] = value
+                sudokuboard.set_value(nextrow,nextcol,0)
 
-                    sudokuboard.set_value(nextrow,nextcol,value)
-  #                  PrintBoard(sudokuboard)
-                    if(checks > 300000):
-                        print "Taking too long..." 
-                        PrintBoard(sudokuboard)
-                        exit()
-
-                    result = RecursiveBacktrack(sudokuboard)
-                    if(result != False):
-                        print "Number of checks: ", checks
-                        PrintBoard(sudokuboard)
-                        return result
-                    sudokuboard.set_value(nextrow, nextcol, 0)
-                
-                if(checks > 300000):
-                    print "Taking too long..." 
-                    PrintBoard(sudokuboard)
-                    exit()
-                    
+            else:
+                return result
+            
     return False
 
-                        
+def CheckConstraints(bd, row, col, val):
+
+    # checks that value does not appear in row, col or the subsquare containing [row,col]
+    size = len(bd)
+    subsquare = (int)(math.sqrt(size))
+
+    for i in range(size):
+        if(bd[row][i] == val or bd[i][col] == val):
+            return False
+
+    SquareRow = row // subsquare
+    SquareCol = col // subsquare
+    # check the subsquare to see if value is already present
+
+    for k in range(subsquare):
+        for j in range(subsquare):
+            if(bd[SquareRow * subsquare + k][SquareCol * subsquare + j] == val):
+#                print "Value " , val, " exists in subsquare " , SquareRow, SquareCol
+                return False
+
+    return True
 
 
 #------ FORWARD CHECKING ALGORITHM ------
@@ -193,22 +194,25 @@ def RecursiveBacktrack( sudokuboard ):
 def PrintBoard(sudokuboard):
     board = sudokuboard.CurrentGameboard
     size = len(board)
+    print size
     for i in range(size):
         for j in range(size):
-            print board[i][j],
+            print board[i][j], "\t",
             if(j == size-1):
                 print ""
     print ""
 
 
 print "Testing backtracking"
-sb = init_board("test1.txt")
-PrintBoard(sb)
-BacktrackingSearch(sb)
-b = init_board("test3.txt")
+#sb = init_board("test1.txt")
+#PrintBoard(sb)
+#BacktrackingSearch(sb)
+b = init_board("test2.txt")
 PrintBoard(b)
 BacktrackingSearch(b)
 
-
+c = init_board("test16x16.txt")
+PrintBoard(c)
+BacktrackingSearch(c)
 
 

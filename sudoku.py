@@ -128,27 +128,30 @@ def RecursiveBacktrack( sudokuboard ):
     
     for row in range(size):
         for col in range(size):
+            if(nextrow != -1 or nextcol != -1):
+                break
             if board[row][col] == 0:
                 nextrow = row
                 nextcol = col
-
+                break
     # try values at location [nextrow, nextcol] 
     for value in range(1,size+1):
 #        print "Try location " , nextrow, ", " , nextcol , " with " , value
         # check if value exists in row or column
         checks += 1
 #        print value
-                                
-#        if(checks > 1000000):
-#            print "Taking too long..." 
-#            PrintBoard(sudokuboard)
-#            checks = 0
+        '''
+        if(checks > 1000000):
+            print "Taking too long..." 
+            PrintBoard(sudokuboard)
+            checks = 0
 #            exit()
-        
+       '''
 
         test = CheckConstraints(board, nextrow, nextcol, value) 
 
         if(test):
+
             sudokuboard.set_value(nextrow,nextcol,value)
             result = RecursiveBacktrack(sudokuboard)
 #            print result
@@ -194,10 +197,23 @@ def CheckConstraints(bd, row, col, val):
 def PrintBoard(sudokuboard):
     board = sudokuboard.CurrentGameboard
     size = len(board)
+    subsquare = (int)(math.sqrt(size))
     print size
     for i in range(size):
+
+#        if(i-1 % subsquare == subsquare - 1):
+#            print "\n",
+
         for j in range(size):
-            print board[i][j], "\t",
+
+            if(j % subsquare == subsquare - 1):
+                print board[i][j], "\t|\t",
+                   
+            else:
+                print board[i][j],
+
+#                print "-"
+
             if(j == size-1):
                 print ""
     print ""
@@ -207,12 +223,18 @@ print "Testing backtracking"
 #sb = init_board("test1.txt")
 #PrintBoard(sb)
 #BacktrackingSearch(sb)
+'''
 b = init_board("test2.txt")
 PrintBoard(b)
 BacktrackingSearch(b)
 
-c = init_board("test16x16.txt")
+#c = init_board("test16x16.txt")
+c = init_board("test4.txt")
 PrintBoard(c)
 BacktrackingSearch(c)
+'''
 
+sb = init_board("test16x16.txt")
+PrintBoard(sb)
+BacktrackingSearch(sb)
 

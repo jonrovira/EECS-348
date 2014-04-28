@@ -248,6 +248,13 @@ class List_Of_Empties:
 		else:
 			return False # already in list
 
+	def remove_empty(self, row, col):
+		key = self.get_key(row, col)
+		if key in self.list:
+			self.list.remove(key)
+		else:
+			return False # not in list
+
 	def add_possible_to_empty(self, row, col, value):
 		key = self.get_key(row, col)
 		if key in self.list:
@@ -323,17 +330,57 @@ def forward_checking(sudokuboard):
 			if board[row][col] == 0:
 				loe.add_empty(row, col)
 
-	print loe.calculate_possibles(board, size)
+	recursive_forward_checking(board, size, loe)
 
-	first = loe.get_first(board, size)
-	key = loe.get_key(first[0], first[1])
-	possibles = loe.list[key].possibles
-	print key
-	print possibles
-	if possibles:
+def recursive_forward_checking(board, size, old_loe):
+	if iscomplete(board):
+		print "Done!"
+		return board
+
+	# Create new list of empties for the node
+	loe = List_Of_Empties()
+	for row in range(size):
+		for col in range(size):
+			if board[row][col] == 0:
+				loe.add_empty(row, col)
+
+	valid = loe.calculate_possibles(board, size)			
+
+	if(valid):
+		first = loe.get_first(board, size)
+		key = loe.get_key(first[0], first[1])
+		first_possibles = loe.list[key].possibles
+		popped_possible = first_possibles[0]
+		loe.list[key].possibles.remove(popped_possible)
+		board[first[0]][first[1]] = popped_possible
+		loe.remove_empty(first[0], first[1])
+		recursive_forward_checking(board, size, loe)
+	else()
+
+
+
+
+
+	if not loe.calculate_possibles(board, size):
+		board[first[0]][first[1]] = 0
+		loe.add_empty(first[0], first[1])
+		recursive_forward_checking(board, size, loe)
+
+	else:
+
+
+
+	if loe.calculate_possibles(board, size):
+		first = loe.get_first(board, size)
+		key = loe.get_key(first[0], first[1])
+		possibles = loe.list[key].possibles
 		popped_possible = possibles[0]
-	print popped_possible
-	board[first[0]][first[1]] = popped_possible
+		board[first[0]][first[1]] = popped_possible
+		recursive_forward_checking(board, size, loe)
+
+	else:
+		return False
+
 
 	for i in range(size):
 		for j in range(size):

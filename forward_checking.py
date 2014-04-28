@@ -119,46 +119,28 @@ def RecursiveBacktrack( sudokuboard ):
         print "Checks: " , checks
         PrintBoard(sudokuboard)
         return board
-    
     #select unassigned variable (in board)
     size = len(board)
     subsquare = (int)(math.sqrt(size))
     nextrow = -1
     nextcol = -1
-    
     for row in range(size):
         for col in range(size):
             if board[row][col] == 0:
                 nextrow = row
                 nextcol = col
-
     # try values at location [nextrow, nextcol] 
     for value in range(1,size+1):
-#        print "Try location " , nextrow, ", " , nextcol , " with " , value
         # check if value exists in row or column
         checks += 1
-#        print value
-                                
-#        if(checks > 1000000):
-#            print "Taking too long..." 
-#            PrintBoard(sudokuboard)
-#            checks = 0
-#            exit()
-        
-
         test = CheckConstraints(board, nextrow, nextcol, value) 
-
         if(test):
             sudokuboard.set_value(nextrow,nextcol,value)
             result = RecursiveBacktrack(sudokuboard)
-#            print result
             if(not result):
-
                 sudokuboard.set_value(nextrow,nextcol,0)
-
             else:
                 return result
-            
     return False
 
 def CheckConstraints(bd, row, col, val):
@@ -238,7 +220,6 @@ class List_Of_Empties:
 						return -1
 		return [row, col]
 
-
 	def add_empty(self, row, col):
 		key = self.get_key(row, col)
 		if key not in self.list:
@@ -271,33 +252,66 @@ class List_Of_Empties:
 		else:
 			return False # empty not in list of empties
 
+	def find_first_empty(self, board, size):
+		found = False
+		row = 0
+		col = 0
+		while not found:
+			if board[row][col] == 0:
+				found = True
+			elif col < 8:
+				col += 1
+			elif row < 8:
+				row += 1
+			else:
+				return False
+		return [row, col]
+
+
 	def calculate_possibles(self, board, size):
+		# For each empty square
 		for e in self.list.values():
+
+			# Initialize possibles to all values
 			possibles = []
-			# add all numbers as possibles
 			for i in range(1, size+1):
 				possibles.append(i)
 
+			# Square's coordinates
 			row = e.coordinate[0]
 			col = e.coordinate[1]
+			subsquare = (int)(math.sqrt(size))
+			squareRow = row // subsquare
+			squareCol = col // subsquare
 
-			# remove possibles that appear in same row
+			# Remove possible values that appear in same row
 			for col_i in range(0, size):
 				val = board[row][col_i]
 				if val != 0 and col_i != col:
 					if val in possibles:
 						possibles.remove(val)
-			# remove possibles that appear in same col
+
+			# Remove possible values that appear in same column
 			for row_i in range(0, size):
 				val = board[row_i][col]
 				if val != 0 and row_i != row:
 					if val in possibles:
 						possibles.remove(val)
-			# add possibles to empties
-			if possibles == []:
-				return False
-			for p in possibles:
-				self.add_possible_to_empty(row, col, p)
+
+			# Remove possible values that appear in same subsquare
+			for x in range(subsquare):
+				for y in range(subsquare):
+					val = board[squareRow * subsquare + x][squareCol * subsquare + y]
+					if val in possibles:
+						possibles.remove(val)
+
+			# Add possible values to empty squares
+			if possibles:
+				for p in possibles:
+					self.add_possible_to_empty(row, col, p)
+			else:	
+				return False # No possibles
+
 		return True
 
 	def print_all(self):
@@ -307,93 +321,83 @@ class List_Of_Empties:
 			print "(" + key + ")"
 
 
-def forward_checking(sudokuboard):
-	"""
-	Forward Checking algorithm
-	"""
-	board = sudokuboard.CurrentGameboard
-
-	# Already done
-	if iscomplete(board):
-		print "Done!"
-		PrintBoard(sudokuboard)
-		return board
-
-	size = len(board)
-	subsquare = math.sqrt(size)
-	loe = List_Of_Empties()
+def forwardCheckConstraints(board, size, row, col, val):
+	# Assign value to square
+	board[row][col] = val
 
 	# Find all empty squares
-	# Add to list of empties
-	for row in range(size):
-		for col in range(size):
-			if board[row][col] == 0:
-				loe.add_empty(row, col)
-
-	recursive_forward_checking(board, size, loe)
-
-def recursive_forward_checking(board, size, old_loe):
-	if iscomplete(board):
-		print "Done!"
-		return board
-
-	# Create new list of empties for the node
 	loe = List_Of_Empties()
 	for row in range(size):
 		for col in range(size):
 			if board[row][col] == 0:
 				loe.add_empty(row, col)
 
-	valid = loe.calculate_possibles(board, size)			
-
-	if(valid):
-		first = loe.get_first(board, size)
-		key = loe.get_key(first[0], first[1])
-		first_possibles = loe.list[key].possibles
-		popped_possible = first_possibles[0]
-		loe.list[key].possibles.remove(popped_possible)
-		board[first[0]][first[1]] = popped_possible
-		loe.remove_empty(first[0], first[1])
-		recursive_forward_checking(board, size, loe)
-	else()
-
-
-
-
-
-	if not loe.calculate_possibles(board, size):
-		board[first[0]][first[1]] = 0
-		loe.add_empty(first[0], first[1])
-		recursive_forward_checking(board, size, loe)
-
-	else:
-
-
-
-	if loe.calculate_possibles(board, size):
-		first = loe.get_first(board, size)
-		key = loe.get_key(first[0], first[1])
-		possibles = loe.list[key].possibles
-		popped_possible = possibles[0]
-		board[first[0]][first[1]] = popped_possible
-		recursive_forward_checking(board, size, loe)
-
+	# Determine if assignment yields possibilities for rest of empties
+	valid = loe.calculate_possibles(board, size)
+	if valid:
+		return True
 	else:
 		return False
 
 
-	for i in range(size):
-		for j in range(size):
-			print board[i][j], "\t",
-			if(j == size-1):
-				print ""
-	print ""
 
+def forward_checking(sudokuboard):
+	"""
+	Forward Checking algorithm
+	"""
+	global checks
 
+	# Check if complete
+	board = sudokuboard.CurrentGameboard
+	if iscomplete(board):
+		print "Finished!"
+		print "Checks: ", checks
+		PrintBoard(sudokuboard)
+		return board
 
+	# Value initializations
+	size = len(board)
+	subsquare = (int)(math.sqrt(size))
+	nextrow = -1
+	nextcol = -1
 
+	# Find all empty squares
+	loe = List_Of_Empties()
+	for row in range(size):
+		for col in range(size):
+			if board[row][col] == 0:
+				loe.add_empty(row, col)
 
-	# Assign possible values to all empty squares
+	# Find all possible values or each empty square
+	loe.calculate_possibles(board, size)
+
+	# Start with first empty square
+	first_empty = loe.find_first_empty(board, size)
+	nextrow = first_empty[0]
+	nextcol = first_empty[1]
+	key = loe.get_key(nextrow, nextcol)
+	empty = loe.list[key]
+
+	# Try a value for that square out of the possibles
+	for value in empty.possibles:
+		checks += 1
+		test = forwardCheckConstraints(board, size, nextrow, nextcol, value)
+
+		# If that value is valid, assign it
+		if(test):
+			sudokuboard.set_value(nextrow, nextcol, value)
+			result = RecursiveBacktrack(sudokuboard)
+
+			# Next level down doesn't work, revert square to 0
+			if not result:
+				sudokuboard.set_value(nextrow, nextcol, 0)
+
+			# Next level down works, return
+			else:
+				return result
+
+	# No values work for the square
+	return False
 
 
 

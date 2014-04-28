@@ -264,11 +264,36 @@ def forward_checking(sudokuboard):
 	loe = List_Of_Empties()
 
 	# Find all empty squares
+	# Add to list of empties
 	for row in range(size):
 		for col in range(size):
 			if board[row][col] == 0:
 				loe.add_empty(row, col)
-	loe.print_all()
+
+	# for each empty in the list of empties
+	for e in loe.list.values():
+		possibles = []
+		# add all numbers as possibles
+		for i in range(1, size+1):
+			possibles.append(i)
+
+		row = e.coordinate[0]
+		col = e.coordinate[1]
+
+		# remove possibles that appear in same row
+		for col_i in range(0, size):
+			val = board[row][col_i]
+			if val != 0 and col_i != col:
+				if val in possibles:
+					possibles.remove(val)
+		# remove possibles that appear in same col
+		for row_i in range(0, size):
+			val = board[row_i][col]
+			if val != 0 and row_i != row:
+				if val in possibles:
+					possibles.remove(val)
+
+
 
 	# Assign possible values to all empty squares
 

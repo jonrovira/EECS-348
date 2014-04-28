@@ -196,7 +196,7 @@ class Empty:
 		self.possibles = []
 
 	def add_possible(self, value):
-		self.possibles[self.num_possibles] = value
+		self.possibles.append(value)
 		self.num_possibles += 1
 
 	def remove_possible(self, value):
@@ -214,6 +214,30 @@ class List_Of_Empties:
 	def get_key(self, row, col):
 		key = str(row) + ", " + str(col)
 		return key
+
+	def get_possibles(self, row, col):
+		key = self.get_key(row, col)
+		return self.list[key].possibles
+
+	def get_first(self, board, size):
+		found = False
+		row = 0
+		col = 0
+		while not found:
+			val = board[row][col]
+			if val == 0:
+				found = True
+			else:
+				if col < 8:
+					col += 1
+				else:
+					if row < 8:
+						row += 1
+						col = 0
+					else:
+						return -1
+		return [row, col]
+
 
 	def add_empty(self, row, col):
 		key = self.get_key(row, col)
@@ -239,6 +263,35 @@ class List_Of_Empties:
 			return True
 		else:
 			return False # empty not in list of empties
+
+	def calculate_possibles(self, board, size):
+		for e in self.list.values():
+			possibles = []
+			# add all numbers as possibles
+			for i in range(1, size+1):
+				possibles.append(i)
+
+			row = e.coordinate[0]
+			col = e.coordinate[1]
+
+			# remove possibles that appear in same row
+			for col_i in range(0, size):
+				val = board[row][col_i]
+				if val != 0 and col_i != col:
+					if val in possibles:
+						possibles.remove(val)
+			# remove possibles that appear in same col
+			for row_i in range(0, size):
+				val = board[row_i][col]
+				if val != 0 and row_i != row:
+					if val in possibles:
+						possibles.remove(val)
+			# add possibles to empties
+			if possibles == []:
+				return False
+			for p in possibles:
+				self.add_possible_to_empty(row, col, p)
+		return True
 
 	def print_all(self):
 		print "------------------"
@@ -270,28 +323,26 @@ def forward_checking(sudokuboard):
 			if board[row][col] == 0:
 				loe.add_empty(row, col)
 
-	# for each empty in the list of empties
-	for e in loe.list.values():
-		possibles = []
-		# add all numbers as possibles
-		for i in range(1, size+1):
-			possibles.append(i)
+	print loe.calculate_possibles(board, size)
 
-		row = e.coordinate[0]
-		col = e.coordinate[1]
+	first = loe.get_first(board, size)
+	key = loe.get_key(first[0], first[1])
+	possibles = loe.list[key].possibles
+	print key
+	print possibles
+	if possibles:
+		popped_possible = possibles[0]
+	print popped_possible
+	board[first[0]][first[1]] = popped_possible
 
-		# remove possibles that appear in same row
-		for col_i in range(0, size):
-			val = board[row][col_i]
-			if val != 0 and col_i != col:
-				if val in possibles:
-					possibles.remove(val)
-		# remove possibles that appear in same col
-		for row_i in range(0, size):
-			val = board[row_i][col]
-			if val != 0 and row_i != row:
-				if val in possibles:
-					possibles.remove(val)
+	for i in range(size):
+		for j in range(size):
+			print board[i][j], "\t",
+			if(j == size-1):
+				print ""
+	print ""
+
+
 
 
 

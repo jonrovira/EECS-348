@@ -201,25 +201,6 @@ class List_Of_Empties:
 		key = self.get_key(row, col)
 		return self.list[key].possibles
 
-	def get_first(self, board, size):
-		found = False
-		row = 0
-		col = 0
-		while not found:
-			val = board[row][col]
-			if val == 0:
-				found = True
-			else:
-				if col < 8:
-					col += 1
-				else:
-					if row < 8:
-						row += 1
-						col = 0
-					else:
-						return -1
-		return [row, col]
-
 	def add_empty(self, row, col):
 		key = self.get_key(row, col)
 		if key not in self.list:
@@ -253,19 +234,18 @@ class List_Of_Empties:
 			return False # empty not in list of empties
 
 	def find_first_empty(self, board, size):
-		found = False
 		row = 0
 		col = 0
-		while not found:
+		while True:
 			if board[row][col] == 0:
-				found = True
-			elif col < 8:
+				return [row, col]
+			elif col < size-1:
 				col += 1
-			elif row < 8:
+			elif row < size-1:
 				row += 1
+				col = 0
 			else:
 				return False
-		return [row, col]
 
 
 	def calculate_possibles(self, board, size):
@@ -386,7 +366,7 @@ def forward_checking(sudokuboard):
 		# If that value is valid, assign it
 		if(test):
 			sudokuboard.set_value(nextrow, nextcol, value)
-			result = RecursiveBacktrack(sudokuboard)
+			result = forward_checking(sudokuboard)
 
 			# Next level down doesn't work, revert square to 0
 			if not result:
@@ -397,6 +377,13 @@ def forward_checking(sudokuboard):
 				return result
 
 	# No values work for the square
+	for i in range(size):
+		for j in range(size):
+			print board[i][j], "\t",
+			if(j == size-1):
+				print ""
+	print ""
+	print checks
 	return False
 
 
@@ -417,9 +404,9 @@ def PrintBoard(sudokuboard):
 
 
 print "\n-------------------------"
-print "Testing backtracking\n"
+print "Testing forward checking\n"
 b = init_board("test2.txt")
 PrintBoard(b)
-forward_checking(b)
+print forward_checking(b)
 
 

@@ -289,7 +289,7 @@ class List_Of_Empties:
 			if possibles:
 				for p in possibles:
 					self.add_possible_to_empty(row, col, p)
-			else:	
+			else:
 				return False # No possibles
 
 		return True
@@ -338,8 +338,6 @@ def forward_checking(sudokuboard):
 	# Value initializations
 	size = len(board)
 	subsquare = (int)(math.sqrt(size))
-	nextrow = -1
-	nextcol = -1
 
 	# Find all empty squares
 	loe = List_Of_Empties()
@@ -375,15 +373,10 @@ def forward_checking(sudokuboard):
 			# Next level down works, return
 			else:
 				return result
+		else:
+			board[nextrow][nextcol] = 0
 
 	# No values work for the square
-	for i in range(size):
-		for j in range(size):
-			print board[i][j], "\t",
-			if(j == size-1):
-				print ""
-	print ""
-	print checks
 	return False
 
 
@@ -394,7 +387,7 @@ def forward_checking(sudokuboard):
 def PrintBoard(sudokuboard):
     board = sudokuboard.CurrentGameboard
     size = len(board)
-    print size
+
     for i in range(size):
         for j in range(size):
             print board[i][j], "\t",

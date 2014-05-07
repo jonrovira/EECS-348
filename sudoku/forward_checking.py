@@ -398,8 +398,8 @@ def PrintBoard(sudokuboard):
 
 print "\n-------------------------"
 print "Testing forward checking\n"
-b = init_board("test2.txt")
+b = init_board("test4.txt")
 PrintBoard(b)
-print forward_checking(b)
+print BacktrackingSearch(b)
 
 

@@ -80,13 +80,15 @@ def MiniMaxDecision(board, player):
                     nextcol = j
 #                    print "Updated next play (max): ", i, ' ', j
                 board.play_square(i, j, 'N')
-
+    '''
     if(maxplay == 1):
         print "I am going to win"
     elif(maxplay == 0):
         print "Playing to tie"
     else:
         print "Shit"
+    '''
+
 
     board.play_square(nextrow, nextcol, player)
 
